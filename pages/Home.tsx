@@ -4,7 +4,8 @@ import { Post } from '../types';
 
 interface HomeProps {
   posts: Post[];
-  onPostClick: (id: number) => void;
+  // Changed id type from number to string to match Post.id type
+  onPostClick: (id: string) => void;
 }
 
 const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
@@ -40,6 +41,7 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
             {featuredPost.excerpt}
           </p>
           <button 
+            // Fix: featuredPost.id is a string, passing it to onPostClick correctly
             onClick={() => onPostClick(featuredPost.id)}
             className="inline-flex items-center gap-2 bg-blue-400 text-white px-8 py-3 rounded-full font-medium hover:bg-blue-500 transition-all shadow-md shadow-blue-100 group"
           >
@@ -58,12 +60,13 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
 
       {/* More Stories */}
       <section className="space-y-8">
-        <h2 className="text-4xl font-serif text-center text-gray-900">More</h2>
+        <h2 className="text-4xl font-serif text-center text-gray-900">更多内容</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {morePosts.map(post => (
             <div 
               key={post.id} 
               className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-50 flex flex-col group cursor-pointer hover:shadow-xl transition-all"
+              // Fix: post.id is a string, passing it to onPostClick correctly
               onClick={() => onPostClick(post.id)}
             >
               <div className="h-48 overflow-hidden">

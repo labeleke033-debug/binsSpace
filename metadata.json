@@ -1,5 +1,5 @@
 {
-  "name": "Simple Blog - Personal Publishing Platform",
-  "description": "A high-fidelity personal blog with featured posts, markdown editing, and admin management, styled after modern minimalist design principles.",
+  "name": "Git-Driven Minimalist Journal",
+  "description": "A high-fidelity personal blog architecture using Git + Markdown for content management, following Next.js engineering patterns.",
   "requestFramePermissions": []
 }

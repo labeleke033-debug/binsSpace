@@ -1,24 +1,22 @@
 
 export interface Post {
-  id: number;
+  id: string;
+  slug: string;       // 对应文件名，用于路由
   title: string;
   excerpt: string;
   content: string;
   author: string;
   date: string;
-  imageUrl?: string;
+  imageUrl: string;
   isFeatured: boolean;
+  category: string;
+  tags?: string[];
 }
 
-export interface Settings {
-  avatarUrl: string;
-  siteName: string;
-}
+// 移除 LOGIN 和 EDITOR，回归纯静态阅读器属性
+export type PageType = 'HOME' | 'DETAIL';
 
-export enum Page {
-  HOME = 'home',
-  DETAIL = 'detail',
-  LOGIN = 'login',
-  POST = 'post',
-  MANAGE = 'manage'
+export interface AppState {
+  currentPage: PageType;
+  selectedPostSlug: string | null;
 }
