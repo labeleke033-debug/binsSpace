@@ -1,26 +1,11 @@
-
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  blog:
+    build: .
+    container_name: binbin-blog
     ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - BACKEND_URL=http://backend:8088
+      - "80:80"
     restart: always
-
-  backend:
-    image: node:18-alpine
-    command: sh -c "npx prisma db push && node server.js"
-    ports:
-      - "8088:8088"
-    environment:
-      - PORT=8088
-      - DATABASE_URL="file:./prisma/dev.db"
-    volumes:
-      - ./prisma:/app/prisma
-    restart: always
+    # 注意：在静态博客架构中，Volume 挂载 Markdown 仅在开发环境有效。
+    # 生产环境部署时，由于代码被 Vite 打包，建议每次更新文章都重新构建镜像。
