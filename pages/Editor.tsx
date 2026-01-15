@@ -28,7 +28,7 @@ const Editor: React.FC<EditorProps> = ({ initialPost, onSave }) => {
       isFeatured,
       imageUrl: imageUrl || `https://picsum.photos/seed/${Math.random()}/1200/600`,
       excerpt: content.substring(0, 150).replace(/[#*`>]/g, '') + '...',
-      author: 'Admin',
+      author: initialPost?.author || 'binbin',
       date: initialPost?.date || new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
     };
     onSave(post);
@@ -193,7 +193,7 @@ const Editor: React.FC<EditorProps> = ({ initialPost, onSave }) => {
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span>Admin</span>
+              <span>{initialPost?.author || 'binbin'}</span>
               <span>•</span>
               <span>{new Date().toLocaleDateString('zh-CN')}</span>
             </div>

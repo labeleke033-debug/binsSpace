@@ -140,7 +140,7 @@ const Manage: React.FC<ManageProps> = ({ posts, settings, onDelete, onEdit, onNe
               </div>
             </div>
             <p className="text-sm text-gray-400">
-              提示：头像和站点名称的更改将立即同步到 SQLite 数据库并应用到全站。
+              提示：头像和站点名称的更改将立即同步到全站。
             </p>
           </div>
         </div>

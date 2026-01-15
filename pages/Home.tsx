@@ -18,7 +18,7 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
       {/* Featured Post */}
       <section className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-50 flex flex-col md:flex-row gap-12 items-center">
         <div className="md:w-1/2 space-y-6">
-          <span className="text-blue-500 font-semibold text-sm tracking-wide uppercase">精选文章</span>
+          <span className="text-blue-500 font-semibold text-sm tracking-wide uppercase">置顶</span>
           <h1 className="text-4xl md:text-5xl font-serif text-gray-900 leading-tight">
             {featuredPost.title}
           </h1>
@@ -58,7 +58,7 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
 
       {/* More Stories */}
       <section className="space-y-8">
-        <h2 className="text-4xl font-serif text-center text-gray-900">更多内容</h2>
+        <h2 className="text-4xl font-serif text-center text-gray-900">More</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {morePosts.map(post => (
             <div 

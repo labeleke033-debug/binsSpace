@@ -71,7 +71,7 @@ const seedData = () => {
       title: '分布式架构：前后端端口分离指南',
       excerpt: '如何正确配置前端 3000 和后端 8088 的跨域通讯。',
       content: '## 端口分配方案\n\n前端运行在 3000，后端运行在 8088。',
-      author: 'Admin',
+      author: 'binbin',
       date: '2024年5月12日',
       imageUrl: 'https://picsum.photos/seed/ports/1200/600',
       isFeatured: 1
