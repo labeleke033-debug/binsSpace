@@ -4,21 +4,21 @@ import { Post } from '../types';
 
 interface HomeProps {
   posts: Post[];
-  onPostClick: (id: string) => void;
+  onPostClick: (id: number) => void;
 }
 
 const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
   const featuredPost = posts.find(p => p.isFeatured) || posts[0];
   const morePosts = posts.filter(p => p.id !== featuredPost?.id);
 
-  if (!featuredPost) return <div className="py-20 text-center text-gray-400">No stories found. Start writing!</div>;
+  if (!featuredPost) return <div className="py-20 text-center text-gray-400">目前没有任何文章。</div>;
 
   return (
     <div className="max-w-6xl mx-auto space-y-16">
       {/* Featured Post */}
       <section className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-50 flex flex-col md:flex-row gap-12 items-center">
         <div className="md:w-1/2 space-y-6">
-          <span className="text-blue-500 font-semibold text-sm tracking-wide uppercase">Featured Post</span>
+          <span className="text-blue-500 font-semibold text-sm tracking-wide uppercase">精选文章</span>
           <h1 className="text-4xl md:text-5xl font-serif text-gray-900 leading-tight">
             {featuredPost.title}
           </h1>
@@ -43,7 +43,7 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
             onClick={() => onPostClick(featuredPost.id)}
             className="inline-flex items-center gap-2 bg-blue-400 text-white px-8 py-3 rounded-full font-medium hover:bg-blue-500 transition-all shadow-md shadow-blue-100 group"
           >
-            Read Full Story
+            阅读全文
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
@@ -58,7 +58,7 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
 
       {/* More Stories */}
       <section className="space-y-8">
-        <h2 className="text-4xl font-serif text-center text-gray-900">More Stories</h2>
+        <h2 className="text-4xl font-serif text-center text-gray-900">更多内容</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {morePosts.map(post => (
             <div 
@@ -78,7 +78,7 @@ const Home: React.FC<HomeProps> = ({ posts, onPostClick }) => {
                   {post.excerpt}
                 </p>
                 <div className="pt-4 flex items-center gap-1 text-blue-400 font-medium text-sm group-hover:gap-2 transition-all">
-                  Read More
+                  继续阅读
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>

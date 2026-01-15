@@ -17,25 +17,26 @@ const Editor: React.FC<EditorProps> = ({ initialPost, onSave }) => {
 
   const handleSave = () => {
     if (!title.trim()) {
-      alert('Please enter a title');
+      alert('请输入文章标题');
       return;
     }
     const post: Post = {
-      id: initialPost?.id || Math.random().toString(36).substr(2, 9),
+      // 0 表示新文章，SQLite 将自动生成 ID
+      id: initialPost?.id || 0,
       title,
       content,
       isFeatured,
       imageUrl: imageUrl || `https://picsum.photos/seed/${Math.random()}/1200/600`,
       excerpt: content.substring(0, 150).replace(/[#*`>]/g, '') + '...',
       author: 'Admin',
-      date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+      date: initialPost?.date || new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
     };
     onSave(post);
   };
 
   const processFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
+      alert('请上传图片文件');
       return;
     }
     const reader = new FileReader();
@@ -99,7 +100,7 @@ const Editor: React.FC<EditorProps> = ({ initialPost, onSave }) => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293z" />
             </svg>
-            发布文章
+            {initialPost ? '更新文章' : '发布到 SQLite'}
           </button>
         </div>
       </div>
@@ -178,7 +179,7 @@ const Editor: React.FC<EditorProps> = ({ initialPost, onSave }) => {
         {/* Preview Area */}
         <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">实时预览</h2>
+            <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">实时预览 (SQLite Schema)</h2>
             {isFeatured && <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">精选</span>}
           </div>
           <div className="prose prose-blue max-w-none space-y-4">
