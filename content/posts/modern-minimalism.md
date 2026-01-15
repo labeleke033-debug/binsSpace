@@ -7,6 +7,7 @@ isFeatured: true
 imageUrl: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1200&q=80"
 slug: "modern-minimalism"
 ---
+
 我以前特别讨厌三个词：**利他、结果导向、接受不完美**。
 
 讨厌不是因为它们不对，而是因为它们太像墙上的标语。
