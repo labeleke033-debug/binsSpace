@@ -74,16 +74,13 @@ const App: React.FC = () => {
       <footer className="py-16 border-t border-gray-100 bg-gray-50/30">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-left">
-             <div className="font-serif font-bold text-xl mb-2">     🌛</div>
              <p className="text-gray-400 text-sm font-light leading-relaxed">春庭月午，摇荡香醪光欲舞。<br/>路转回廊，半落梅花婉娩香。</p>
           </div>
           <div className="flex flex-col items-center md:items-end gap-2">
             <div className="flex gap-4 text-xs font-bold text-gray-400">
-              <span>Why</span>
-              <span>When</span>
-              <span>How</span>
+              <span></span>
             </div>
-            <p className="text-gray-300 text-[10px] uppercase tracking-widest">Ask yourself every single time.</p>
+            <p className="text-gray-300 text-[10px] uppercase tracking-widest"></p>
           </div>
         </div>
       </footer>
