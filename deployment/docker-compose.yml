@@ -2,28 +2,25 @@
 version: '3.8'
 
 services:
-  app:
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: "file:./dev.db"
-      NEXT_PUBLIC_BASE_PATH: "/blog"
-    volumes:
-      - ./prisma/dev.db:/app/prisma/dev.db
-    restart: always
-
-  caddy:
-    image: caddy:2-alpine
-    restart: always
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - BACKEND_URL=http://backend:8088
+    restart: always
 
-volumes:
-  caddy_data:
-  caddy_config:
+  backend:
+    image: node:18-alpine
+    command: sh -c "npx prisma db push && node server.js"
+    ports:
+      - "8088:8088"
+    environment:
+      - PORT=8088
+      - DATABASE_URL="file:./prisma/dev.db"
+    volumes:
+      - ./prisma:/app/prisma
+    restart: always

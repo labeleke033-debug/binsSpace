@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Post, Page } from './types';
+import { Post, Page, Settings } from './types';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -10,11 +10,13 @@ import Editor from './pages/Editor';
 import Manage from './pages/Manage';
 import { isAuthorized } from './middleware';
 import * as db from './lib/db';
+import { CONFIG } from './config';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.HOME);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [settings, setSettings] = useState<Settings>({ avatarUrl: '', siteName: 'zuobin.wang' });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDbReady, setIsDbReady] = useState(false);
 
@@ -23,12 +25,15 @@ const App: React.FC = () => {
     const setup = async () => {
       try {
         await db.initDB();
-        const allPosts = db.getAllPosts();
+        const [allPosts, currentSettings] = await Promise.all([
+          db.getAllPosts(),
+          db.getSettings()
+        ]);
         setPosts(allPosts);
+        setSettings(currentSettings);
         setIsDbReady(true);
-        console.log("App: 数据库就绪，初始加载文章数:", allPosts.length);
       } catch (err) {
-        console.error("App: 数据库初始化失败:", err);
+        console.error("App: 数据加载失败:", err);
       }
     };
     setup();
@@ -75,30 +80,36 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSavePost = (postData: Post) => {
-    console.log("App: 正在请求保存文章...");
-    db.savePost(postData);
-    const updatedPosts = db.getAllPosts();
+  const handleSavePost = async (postData: Post) => {
+    setIsDbReady(false);
+    await db.savePost(postData);
+    const updatedPosts = await db.getAllPosts();
     setPosts(updatedPosts);
-    console.log("App: 文章列表已同步，当前总数:", updatedPosts.length);
+    setIsDbReady(true);
     navigate(Page.MANAGE);
   };
 
-  const handleDeletePost = (id: number) => {
-    const confirmed = window.confirm(`确定要从数据库中永久删除文章 (ID: ${id}) 吗？`);
-    if (confirmed) {
-      console.log(`App: 正在请求删除文章 ID: ${id}`);
-      db.deletePost(id);
-      
-      // 关键：获取新数据并更新状态
-      const remainingPosts = db.getAllPosts();
-      setPosts(remainingPosts);
-      
-      console.log(`App: 删除完成。剩余文章数: ${remainingPosts.length}`);
-      if (remainingPosts.length === 0) {
-        console.warn("App: 数据库现在是空的。");
-      }
+  const handleDeletePost = async (id: number) => {
+    setIsDbReady(false);
+    try {
+      await db.deletePost(id);
+      const updatedPosts = await db.getAllPosts();
+      setPosts(updatedPosts);
+    } catch (error) {
+      console.error("App: 删除操作失败", error);
+    } finally {
+      setIsDbReady(true);
     }
+  };
+
+  const handleUpdateAvatar = async (url: string) => {
+    await db.updateSetting('avatarUrl', url);
+    setSettings(prev => ({ ...prev, avatarUrl: url }));
+  };
+
+  const handleUpdateSiteName = async (name: string) => {
+    await db.updateSetting('siteName', name);
+    setSettings(prev => ({ ...prev, siteName: name }));
   };
 
   const handleLogout = () => {
@@ -111,8 +122,11 @@ const App: React.FC = () => {
     if (!isDbReady) {
       return (
         <div className="flex flex-col items-center justify-center py-40 gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-400 font-medium animate-pulse-slow">正在同步 SQLite 状态...</p>
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-100 rounded-full"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+          </div>
+          <p className="text-gray-400 font-medium animate-pulse">正在同步数据...</p>
         </div>
       );
     }
@@ -132,9 +146,12 @@ const App: React.FC = () => {
         return (
           <Manage 
             posts={posts} 
+            settings={settings}
             onDelete={handleDeletePost} 
             onEdit={(id) => { setSelectedPostId(id); navigate(Page.POST); }} 
             onNew={() => { setSelectedPostId(null); navigate(Page.POST); }} 
+            onUpdateAvatar={handleUpdateAvatar}
+            onUpdateSiteName={handleUpdateSiteName}
           />
         );
       default:
@@ -146,6 +163,8 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col">
       <Header 
         isLoggedIn={isLoggedIn} 
+        avatarUrl={settings.avatarUrl}
+        siteName={settings.siteName}
         onNavigateHome={() => navigate(Page.HOME)} 
         onNavigateLogin={() => navigate(Page.LOGIN)}
         onNavigateManage={() => navigate(Page.MANAGE)}

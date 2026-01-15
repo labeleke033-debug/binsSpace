@@ -1,12 +1,14 @@
 
-import { Post } from '../types';
+import { Post, Settings } from '../types';
+import { CONFIG } from '../config';
 
 declare var initSqlJs: any;
 
 let db: any = null;
 const STORAGE_KEY = 'sqlite_blog_v2';
 
-// 编码转换：Uint8Array 转 Base64
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 function uint8ArrayToBase64(u8: Uint8Array): string {
   let bin = "";
   for (let i = 0; i < u8.length; i++) {
@@ -15,7 +17,6 @@ function uint8ArrayToBase64(u8: Uint8Array): string {
   return btoa(bin);
 }
 
-// 解码转换：Base64 转 Uint8Array
 function base64ToUint8Array(base64: string): Uint8Array {
   const bin = atob(base64);
   const u8 = new Uint8Array(bin.length);
@@ -28,17 +29,18 @@ function base64ToUint8Array(base64: string): Uint8Array {
 export const initDB = async (): Promise<void> => {
   if (db) return;
 
-  console.log("Prisma-Sim: 正在连接 SQLite 引擎 (SQL.js)...");
   const SQL = await initSqlJs({
     locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
   });
 
   const savedDb = localStorage.getItem(STORAGE_KEY);
   if (savedDb) {
-    console.log("Prisma-Sim: 读取本地 dev.db 文件镜像...");
     db = new SQL.Database(base64ToUint8Array(savedDb));
+    console.log("[Backend] 已加载持久化 dev.db");
+    
+    // 确保 settings 表存在 (迁移逻辑)
+    db.run(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`);
   } else {
-    console.log("Prisma-Sim: dev.db 不存在，正在执行 npx prisma db push...");
     db = new SQL.Database();
     db.run(`
       CREATE TABLE posts (
@@ -52,26 +54,26 @@ export const initDB = async (): Promise<void> => {
         isFeatured INTEGER DEFAULT 0
       )
     `);
+    db.run(`CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT)`);
     seedData();
   }
+  await delay(200);
 };
 
 const persist = () => {
   const data = db.export();
   localStorage.setItem(STORAGE_KEY, uint8ArrayToBase64(data));
-  console.log("Prisma-Sim: 数据库已持久化至浏览器存储 (模拟文件写入成功)");
 };
 
 const seedData = () => {
-  console.log("Prisma-Sim: 正在执行数据初始化 (Seed)...");
   const initialPosts = [
     {
-      title: '欢迎来到我的个人博客',
-      excerpt: '这是一个基于 SQLite 的高保定个人出版平台。',
-      content: '## 开始你的创作\n\n你可以登录后台管理系统，发布、编辑或删除文章。所有的变更都会实时同步到 SQLite 数据库中。',
+      title: '分布式架构：前后端端口分离指南',
+      excerpt: '如何正确配置前端 3000 和后端 8088 的跨域通讯。',
+      content: '## 端口分配方案\n\n前端运行在 3000，后端运行在 8088。',
       author: 'Admin',
-      date: '2024年5月10日',
-      imageUrl: 'https://picsum.photos/seed/writing/1200/600',
+      date: '2024年5月12日',
+      imageUrl: 'https://picsum.photos/seed/ports/1200/600',
       isFeatured: 1
     }
   ];
@@ -82,10 +84,33 @@ const seedData = () => {
       [p.title, p.excerpt, p.content, p.author, p.date, p.imageUrl, p.isFeatured]
     );
   });
+
+  db.run("INSERT INTO settings (key, value) VALUES (?, ?)", ['avatarUrl', 'https://picsum.photos/seed/avatar/200/200']);
+  db.run("INSERT INTO settings (key, value) VALUES (?, ?)", ['siteName', 'zuobin.wang']);
+  
   persist();
 };
 
-export const getAllPosts = (): Post[] => {
+export const getSettings = async (): Promise<Settings> => {
+  const res = db.exec("SELECT key, value FROM settings");
+  const settings: any = {};
+  if (res.length > 0) {
+    res[0].values.forEach((row: any[]) => {
+      settings[row[0]] = row[1];
+    });
+  }
+  return {
+    avatarUrl: settings.avatarUrl || '',
+    siteName: settings.siteName || 'Simple Blog'
+  };
+};
+
+export const updateSetting = async (key: string, value: string): Promise<void> => {
+  db.run("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", [key, value]);
+  persist();
+};
+
+export const getAllPosts = async (): Promise<Post[]> => {
   const res = db.exec("SELECT * FROM posts ORDER BY id DESC");
   if (res.length === 0) return [];
   
@@ -100,9 +125,9 @@ export const getAllPosts = (): Post[] => {
   });
 };
 
-export const savePost = (post: Partial<Post>): number => {
+export const savePost = async (post: Partial<Post>): Promise<number> => {
+  await delay(200);
   if (post.id && post.id !== 0) {
-    console.log(`Prisma-Sim: prisma.post.update({ where: { id: ${post.id} } })`);
     db.run(
       "UPDATE posts SET title=?, excerpt=?, content=?, author=?, date=?, imageUrl=?, isFeatured=? WHERE id=?",
       [post.title, post.excerpt, post.content, post.author, post.date, post.imageUrl, post.isFeatured ? 1 : 0, post.id]
@@ -110,7 +135,6 @@ export const savePost = (post: Partial<Post>): number => {
     persist();
     return post.id;
   } else {
-    console.log(`Prisma-Sim: prisma.post.create({ data: ... })`);
     db.run(
       "INSERT INTO posts (title, excerpt, content, author, date, imageUrl, isFeatured) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [post.title, post.excerpt, post.content, post.author, post.date, post.imageUrl, post.isFeatured ? 1 : 0]
@@ -121,14 +145,7 @@ export const savePost = (post: Partial<Post>): number => {
   }
 };
 
-export const deletePost = (id: number): void => {
-  console.log(`Prisma-Sim: prisma.post.delete({ where: { id: ${id} } })`);
+export const deletePost = async (id: number): Promise<void> => {
   db.run("DELETE FROM posts WHERE id = ?", [id]);
-  
-  // 确认记录已被移除
-  const check = db.exec("SELECT COUNT(*) FROM posts WHERE id = ?", [id]);
-  if (check[0].values[0][0] === 0) {
-    console.log(`Prisma-Sim: ID 为 ${id} 的文章已从 SQLite 中成功删除。`);
-    persist();
-  }
+  persist();
 };

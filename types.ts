@@ -10,6 +10,11 @@ export interface Post {
   isFeatured: boolean;
 }
 
+export interface Settings {
+  avatarUrl: string;
+  siteName: string;
+}
+
 export enum Page {
   HOME = 'home',
   DETAIL = 'detail',
