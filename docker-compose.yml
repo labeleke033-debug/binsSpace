@@ -1,13 +1,13 @@
-
 version: '3.8'
 
 services:
   blog:
-    build: .
+    image: binbin-blog:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
     container_name: binbin-blog
     ports:
       - "80:80"
     restart: always
-    volumes:
-      # 重要：将内容目录挂载出来，以后更新文章只需在服务器修改文件，重启容器即可
-      - ./content/posts:/usr/share/nginx/html/content/posts

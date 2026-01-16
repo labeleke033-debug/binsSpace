@@ -1,28 +1,24 @@
 # 第一阶段：构建环境
 FROM node:20-alpine AS build
-
 WORKDIR /app
 
-# 复制依赖定义文件
 COPY package*.json ./
-
-# 安装依赖
 RUN npm install
 
-# 复制所有源代码
 COPY . .
-
-# 执行生产构建
 RUN npm run build
 
 # 第二阶段：运行环境 (Nginx)
 FROM nginx:stable-alpine
 
-# 从构建阶段复制编译后的静态文件到 Nginx 目录
+# 接收构建时传入的版本号（commit）
+ARG GIT_SHA=unknown
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# 暴露 80 端口
-EXPOSE 80
+# 生成一个版本探针文件，部署后用它验证新旧
+RUN echo "$GIT_SHA" > /usr/share/nginx/html/__version.txt \
+  && date -u +"%Y-%m-%dT%H:%M:%SZ" > /usr/share/nginx/html/__build_time_utc.txt
 
-# 启动 Nginx
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

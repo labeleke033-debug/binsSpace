@@ -8,5 +8,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false
-  }
+  },
+  define: { global: "globalThis" },
+  optimizeDeps: { include: ["buffer"] },
 });
