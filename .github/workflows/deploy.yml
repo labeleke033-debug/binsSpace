@@ -21,14 +21,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # 确保进入正确的目录
-            cd /var/www/binbin-blog || exit 1
-            
-            # 拉取最新代码
-            git pull origin $(git rev-parse --abbrev-ref HEAD)
-            
-            # 强制重新构建镜像（这一步非常关键，因为 Vite 需要重新扫描 Markdown 文件）
-            docker compose down
-            docker compose up -d --build
-            
-            # 清理过期镜像释放空间
-            docker image prune -f
+            set -e
+            cd /opt/zuobin-blog/binsSpace || exit 1
+            # 执行指定deploy文件，里面写了对git的操作等
+            ./deploy.sh main
