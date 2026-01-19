@@ -24,6 +24,5 @@ echo "==> Cleanup images"
 docker image prune -f
 
 echo "==> Done: $(git rev-parse --short HEAD)"
-EOF
 
 chmod +x deploy.sh
