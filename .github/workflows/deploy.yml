@@ -24,4 +24,4 @@ jobs:
             set -e
             cd /opt/zuobin-blog/binsSpace || exit 1
             # 执行指定deploy文件，里面写了对git的操作等
-            ./deploy.sh main
+            bash ./deploy.sh main
