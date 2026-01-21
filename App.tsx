@@ -1,1 +1,0 @@
-// Deprecated. Use index.tsx as the main entry point.

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Post, PageType } from './types';
-import { getAllPosts, getPostBySlug } from './lib/posts';
+import { getAllPosts } from './lib/posts';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -22,6 +22,10 @@ const App: React.FC = () => {
         const hash = window.location.hash;
         return hash.startsWith('#/article/') ? hash.replace('#/article/', '') : null;
     });
+
+    // 添加微信显示效果
+    const [wechatOpen, setWechatOpen] = useState(false);
+    const wechatBoxRef = useRef(null);
 
     // ✅ 首次加载文章（从 /content/posts/manifest.json + md fetch）
     useEffect(() => {
@@ -74,6 +78,18 @@ const App: React.FC = () => {
         return posts.find((p) => p.slug === selectedPostSlug) || null;
     }, [posts, selectedPostSlug]);
 
+    // 点击空白处关闭（可选，但更像“弹出框”）
+    useEffect(() => {
+        function onDocClick(e) {
+            if (!wechatOpen) return;
+            if (wechatBoxRef.current && !wechatBoxRef.current.contains(e.target)) {
+                setWechatOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", onDocClick);
+        return () => document.removeEventListener("mousedown", onDocClick);
+    }, [wechatOpen]);
+
     return (
         <div className="min-h-screen flex flex-col selection:bg-black selection:text-white">
             {/* 极简导航：移除了管理与登录入口 */}
@@ -88,7 +104,8 @@ const App: React.FC = () => {
                         <span className="font-serif text-2xl font-bold tracking-tighter">Binbin's Space.</span>
                     </div>
                     <div className="flex items-center gap-8">
-                        <button onClick={goHome} className="text-sm font-semibold hover:text-blue-600 transition-colors">
+                        <button onClick={goHome}
+                                className="text-sm font-semibold hover:text-blue-600 transition-colors">
                             文章
                         </button>
                         <a
@@ -115,18 +132,19 @@ const App: React.FC = () => {
                     <div className="py-20 text-center text-gray-400 space-y-3">
                         <div>{errorMsg}</div>
                         <div className="text-sm">
-                            请检查：<code className="px-1">/content/posts/manifest.json</code> 是否可访问，且列出的 md 文件存在。
+                            请检查：<code className="px-1">/content/posts/manifest.json</code> 是否可访问，且列出的 md
+                            文件存在。
                         </div>
                     </div>
                 )}
 
                 {!loading && !errorMsg && currentPage === 'HOME' && (
-                    <HomePage posts={posts} onPostClick={goDetail} />
+                    <HomePage posts={posts} onPostClick={goDetail}/>
                 )}
 
                 {!loading && !errorMsg && currentPage === 'DETAIL' && selectedPostSlug && (
                     selectedPost ? (
-                        <DetailPage post={selectedPost} onBack={goHome} />
+                        <DetailPage post={selectedPost} onBack={goHome}/>
                     ) : (
                         <div className="py-20 text-center text-gray-400">
                             未找到该文章：{selectedPostSlug}
@@ -142,14 +160,64 @@ const App: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="text-left">
                         <p className="text-gray-400 text-sm font-light leading-relaxed">
-                            春庭月午，摇荡香醪光欲舞。<br />
+                            春庭月午，摇荡香醪光欲舞。<br/>
                             路转回廊，半落梅花婉娩香。
                         </p>
                     </div>
+
                     <div className="flex flex-col items-center md:items-end gap-2">
-                        <div className="flex gap-4 text-xs font-bold text-gray-400">
-                            <span></span>
+                        {/* 改成纵向排列：WeChat 在上，Weibo 在下 */}
+                        <div className="flex flex-col items-center md:items-end gap-2 text-xs font-bold text-gray-400">
+
+                            {/* WeChat（hover 或 click 显示二维码框） */}
+                            <div className="relative group">
+                                <button
+                                    type="button"
+                                    onClick={() => setWechatOpen((v) => !v)}
+                                    className="transition-colors hover:text-emerald-500"
+                                    aria-haspopup="dialog"
+                                    aria-expanded={wechatOpen}
+                                >
+                                    WeChat
+                                </button>
+
+                                <div
+                                    ref={wechatBoxRef}
+                                    className={`
+                                      absolute right-0 bottom-full mt-2 w-44
+                                      rounded-xl border border-gray-200 bg-white shadow-lg p-2
+                                      hidden group-hover:block
+                                      ${wechatOpen ? "!block" : ""}
+                                    `}
+                                >
+                                    <img
+                                        src="/resource/pics/WeChatQRCode.jpg"
+                                        alt="WeChat QR Code"
+                                        className="w-full h-auto rounded-lg"
+                                    />
+                                    <p className="mt-2 text-[10px] font-medium text-gray-500 text-center">
+                                        扫码加我微信
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Weibo */}
+                            <a
+                                href="https://weibo.com/u/3380730204"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="
+                                transition-all
+                                hover:bg-gradient-to-r hover:from-pink-400 hover:via-purple-400 hover:to-cyan-400
+                                hover:text-transparent hover:bg-clip-text
+                              "
+                            >
+                                <span className="underline underline-offset-2">Weibo</span>
+                                {" : "}
+                                <span>午夜飙车的猪</span>
+                            </a>
                         </div>
+
                         <p className="text-gray-300 text-[10px] uppercase tracking-widest"></p>
                     </div>
                 </div>
@@ -159,7 +227,7 @@ const App: React.FC = () => {
 };
 
 // --- 子页面组件 ---
-const HomePage: React.FC<{ posts: Post[]; onPostClick: (slug: string) => void }> = ({ posts, onPostClick }) => {
+const HomePage: React.FC<{ posts: Post[]; onPostClick: (slug: string) => void }> = ({posts, onPostClick}) => {
     const featured = posts.find((p) => p.isFeatured) || posts[0];
     const others = posts.filter((p) => p.slug !== featured?.slug);
 
@@ -177,7 +245,8 @@ const HomePage: React.FC<{ posts: Post[]; onPostClick: (slug: string) => void }>
                         />
                     </div>
                     <div className="space-y-6">
-                        <span className="text-xs font-bold uppercase tracking-widest text-blue-600">{featured.category}</span>
+                        <span
+                            className="text-xs font-bold uppercase tracking-widest text-blue-600">{featured.category}</span>
                         <h1 className="text-5xl lg:text-6xl font-serif font-bold leading-[1.1]">{featured.title}</h1>
                         <p className="text-gray-500 text-lg leading-relaxed line-clamp-3">{featured.excerpt}</p>
                         <div className="flex items-center gap-4 pt-4 border-t border-gray-50">

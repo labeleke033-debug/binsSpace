@@ -1,1 +1,0 @@
-// Deprecated in Git-Driven Architecture.

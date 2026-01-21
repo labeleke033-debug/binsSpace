@@ -1,1 +1,0 @@
-// Deprecated. Using localStorage for simple persistence.
