@@ -4,7 +4,7 @@ date: "2026-01-29"
 author: "Binbin"
 category: "Memories"
 isFeatured: false
-imageUrl: "https://i.meee.com.tw/FO0LBiJ.jpg"
+imageUrl: "https://i.mji.rip/2026/01/30/4b3a737cc34867e0c3dcbc5cb47b06a4.jpeg"
 slug: "bye-bye-my-first-vehicle"
 ---
 
