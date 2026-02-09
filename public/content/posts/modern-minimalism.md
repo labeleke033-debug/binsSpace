@@ -3,7 +3,7 @@ title: "现代人的胜利"
 date: "2026-01-15"
 author: "Binbin"
 category: "Thinking"
-isFeatured: true
+isFeatured: false
 imageUrl: "https://i.ibb.co/1Y0PxNqk/image.jpg"
 slug: "modern-minimalism"
 ---
