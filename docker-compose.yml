@@ -9,5 +9,5 @@ services:
         GIT_SHA: ${GIT_SHA:-unknown}
     container_name: binbin-blog
     ports:
-      - "80:80"
+      - "8080:80"
     restart: always
